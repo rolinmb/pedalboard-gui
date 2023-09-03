@@ -1,4 +1,6 @@
-import app
+from app import *
 
 if __name__ == '__main__':
-    pass
+    root = tk.Tk()
+    app = App(root)
+    app.run()
