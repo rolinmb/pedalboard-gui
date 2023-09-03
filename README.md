@@ -1,0 +1,1 @@
+Making a front end desktop app for Spotify's Pedalboard python library via python tkinter
