@@ -6,8 +6,7 @@ from pedalboard.io import AudioFile
 
 SAMPLE_RATE = 44100.0
 FX_LIST = ["Bitcrush", "Chorus", "Delay", "Gain", "Phaser", "Reverb"]
-PLUGIN_LIST = [Bitcrush, Chorus, Delay, Gain, Phaser, Reverb]
-FX_DICT = {fx_name: plugin for fx_name, plugin in zip(FX_LIST, PLUGIN_LIST)}
+FX_DICT = {fx_name: plugin for fx_name, plugin in zip(FX_LIST, [Bitcrush, Chorus, Delay, Gain, Phaser, Reverb])}
 
 class App:
     def __init__(self, root):
@@ -84,16 +83,15 @@ class App:
                     toApply.append(fx_plugin())
             self.board = Pedalboard(toApply)
             effected = self.board(audio, SAMPLE_RATE)
-            if self.output_file_path:
-                with AudioFile(self.output_file_path, "w", SAMPLE_RATE, effected.shape[0]) as fout:
-                    fout.write(effected)
-            else:
-                if self.output_file_path:
-                    messagebox.showerror("Error", "Please enter an output file name")
-                else:
-                    messagebox.showerror("Error", "Please select an input .wav file")
+            with AudioFile(self.output_file_path, "w", SAMPLE_RATE, effected.shape[0]) as fout:
+                fout.write(effected)
         else:
-            messagebox.showerror("Error", "Please select an input audio file path")
+            if self.input_file_path and not self.output_file_path:
+                messagebox.showerror("Error", "Please enter an output file name")
+            elif self.output_file_path and not self.input_file_path:
+                messagebox.showerror("Error", "Please select an input .wav file")
+            else:
+                messagebox.showerror("Error", "Please select an input .wav and enter an output .wav")
         print(f"app.py_process() Execution Time: {str(round(time() - start, 2))} seconds")
 
     def run(self):
