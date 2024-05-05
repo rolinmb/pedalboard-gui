@@ -6,19 +6,19 @@ from pedalboard import Pedalboard, Bitcrush, Chorus, Clipping, Compressor, Delay
 from pedalboard.io import AudioFile
 """
 tkinter_version = tk.Tcl().eval("info patchlevel")
-print("\ntkinter version: "+tkinter_version+"\n")
+print("\napp.py tkinter version: "+tkinter_version+"\n")
 tk._test()
 """
-# Pedalboard built-in FX / VST emulator parameters
-# print(vars(Bitcrush)) # bit_depth
-# print(vars(Chorus)) # rate_hz, depth, centre_delay_ms, feedback, mix
-# print(vars(Clipping)) # threshold_db
-# print(vars(Compressor)) # threshold_db, ratio, attack_ms, release_ms 
-# print(vars(Delay)) # delay_seconds, feedback, mix 
-# print(vars(Gain)) # gain_db
-# print(vars(Limiter)) # threshold_db, release_ms
-# print(vars(Phaser)) # rate_hz, depth, centre_frequency_hz, feedback, mix
-# print(vars(Reverb)) # room_size, damping, wet_level, dry_level, width, freeze_mode
+# Pedalboard built-in FX class member vars and init / default values
+#print(vars(Bitcrush)) # bit_depth = 8 (float >= 32.0 && float <= 0.0)
+#print(vars(Chorus)) # rate_hz = 1.0 (float <= 100.0 && float >= 0.0), depth = 0.25 (float), centre_delay_ms = 7.0 (float), feedback = 0.0 (float), mix = 0.5 (float <= 1.0 && float >= 0.0)
+#print(vars(Clipping)) # threshold_db = -6.0 (float)
+#print(vars(Compressor)) # threshold_db = 0 (float), ratio = 1 (float >= 1.0), attack_ms = 1.0 (float), release_ms = 100 (float)
+#print(vars(Delay)) # delay_seconds = 0.5 (float >= 0.0), feedback = 0.0 (float <= 1.0 && float >= 0.0) , mix = 0.5 (float <= 1.0 && float >= 0.0)
+#print(vars(Gain)) # gain_db = 1.0 (float)
+#print(vars(Limiter)) # threshold_db = -10.0 (float), release_ms = 100.0 (float)
+#print(vars(Phaser)) # rate_hz = 1.0 (float >= 0.0), depth = 0.5 (float >= 0.0), centre_frequency_hz = 1300.0 (float >= 0.0), feedback = 0.0 (float <= 1.0 && float >= 0.0), mix = 0.5 (float <= 1.0 && float >= 0.0)
+#print(vars(Reverb)) # room_size = 0.5, damping = 0.5, wet_level = 0.33, dry_level = 0.4, width = 1.0, freeze_mode = 0.0 (all float <= 1.0 && float >= 0.0)
 
 SAMPLE_RATE = 44100.0
 FX_LIST = ["Bitcrush", "Chorus", "Clipping", "Compressor", "Delay", "Gain", "Limiter",  "Phaser", "Reverb"]
@@ -99,6 +99,7 @@ class App:
                 if fx_name in FX_LIST:
                     fx_plugin = FX_DICT[fx_name]
                     toApply.append(fx_plugin())
+            # TODO: adjust plugin parameters accordingly from repsective class member vars
             self.board = Pedalboard(toApply)
             effected = self.board(audio, SAMPLE_RATE)
             with AudioFile(self.output_file_path, "w", SAMPLE_RATE, effected.shape[0]) as fout:
@@ -110,7 +111,7 @@ class App:
                 messagebox.showerror("Error", "Please select an input .wav file")
             else:
                 messagebox.showerror("Error", "Please select an input .wav and enter an output .wav")
-        print(f"app.py_process() Execution Time: {str(round(time() - start, 2))} seconds")
+        print(f"app.py process() Execution Time: {str(round(time() - start, 2))} seconds")
 
     def run(self):
         self.root.mainloop()
