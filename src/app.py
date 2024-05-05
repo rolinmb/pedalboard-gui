@@ -1,3 +1,4 @@
+from rknob import RadialKnob
 from time import time
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -41,6 +42,8 @@ class App:
         self.fx_currentbox.pack()
         self.process_button = tk.Button(self.root, text="Process Audio", command=self.process)
         self.process_button.pack()
+        self.test_rknob = RadialKnob(self.root)
+        self.test_rknob.pack()
 
     def open_file_dialog(self):
         self.input_file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav")])
