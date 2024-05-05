@@ -3,7 +3,11 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from pedalboard import Pedalboard, Bitcrush, Chorus, Delay, Gain, Phaser, Reverb
 from pedalboard.io import AudioFile
-
+"""
+tkinter_version = tk.Tcl().eval("info patchlevel")
+print("\ntkinter version: "+tkinter_version+"\n")
+tk._test()
+"""
 SAMPLE_RATE = 44100.0
 FX_LIST = ["Bitcrush", "Chorus", "Delay", "Gain", "Phaser", "Reverb"]
 FX_DICT = {fx_name: plugin for fx_name, plugin in zip(FX_LIST, [Bitcrush, Chorus, Delay, Gain, Phaser, Reverb])}
