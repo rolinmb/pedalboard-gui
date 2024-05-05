@@ -10,7 +10,6 @@ class RadialKnob(tk.Canvas):
         self.radius = 40
         self.bind("<Button-1>", self.on_click)
         self.bind("<B1-Motion>", self.on_drag)
-        
         self.draw_knob()
     
     def draw_knob(self):

@@ -2,16 +2,27 @@ from rknob import RadialKnob
 from time import time
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from pedalboard import Pedalboard, Bitcrush, Chorus, Delay, Gain, Phaser, Reverb
+from pedalboard import Pedalboard, Bitcrush, Chorus, Clipping, Compressor, Delay, Gain, Limiter, Phaser, Reverb
 from pedalboard.io import AudioFile
 """
 tkinter_version = tk.Tcl().eval("info patchlevel")
 print("\ntkinter version: "+tkinter_version+"\n")
 tk._test()
 """
+# Pedalboard built-in FX / VST emulator parameters
+# print(vars(Bitcrush)) # bit_depth
+# print(vars(Chorus)) # rate_hz, depth, centre_delay_ms, feedback, mix
+# print(vars(Clipping)) # threshold_db
+# print(vars(Compressor)) # threshold_db, ratio, attack_ms, release_ms 
+# print(vars(Delay)) # delay_seconds, feedback, mix 
+# print(vars(Gain)) # gain_db
+# print(vars(Limiter)) # threshold_db, release_ms
+# print(vars(Phaser)) # rate_hz, depth, centre_frequency_hz, feedback, mix
+# print(vars(Reverb)) # room_size, damping, wet_level, dry_level, width, freeze_mode
+
 SAMPLE_RATE = 44100.0
-FX_LIST = ["Bitcrush", "Chorus", "Delay", "Gain", "Phaser", "Reverb"]
-FX_DICT = {fx_name: plugin for fx_name, plugin in zip(FX_LIST, [Bitcrush, Chorus, Delay, Gain, Phaser, Reverb])}
+FX_LIST = ["Bitcrush", "Chorus", "Clipping", "Compressor", "Delay", "Gain", "Limiter",  "Phaser", "Reverb"]
+FX_DICT = {fx_name: plugin for fx_name, plugin in zip(FX_LIST, [Bitcrush, Chorus, Clipping, Compressor, Delay, Gain, Limiter, Phaser, Reverb])}
 
 class App:
     def __init__(self, root):
