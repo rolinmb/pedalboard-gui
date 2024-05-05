@@ -22,7 +22,57 @@ tk._test()
 
 SAMPLE_RATE = 44100.0
 FX_LIST = ["Bitcrush", "Chorus", "Clipping", "Compressor", "Delay", "Gain", "Limiter",  "Phaser", "Reverb"]
-FX_DICT = {fx_name: plugin for fx_name, plugin in zip(FX_LIST, [Bitcrush, Chorus, Clipping, Compressor, Delay, Gain, Limiter, Phaser, Reverb])}
+FX_DICT = {
+    "Bitcrush": Bitcrush,
+    "Chorus": Chorus,
+    "Clipping": Clipping,
+    "Compressor": Compressor,
+    "Delay": Delay,
+    "Gain": Gain,
+    "Limiter": Limiter,
+    "Phaser": Phaser,
+    "Reverb": Reverb
+}
+PARAMNAMESMAP = {
+    "Bitcrush": ["bit_depth"],
+    "Chorus": ["rate_hz", "depth", "centre_delay_ms", "feedback", "mix"],
+    "Clipping": ["threshold_db"],
+    "Compressor": ["threshold_db", "ratio", "attack_ms", "release_ms"],
+    "Delay": ["delay_seconds", "feedback", "mix"],
+    "Gain": ["gain_db"],
+    "Limiter": ["threshold_db", "release_ms"],
+    "Phaser": ["rate_hz", "depth", "centre_frequency_hz", "feedback", "mix"],
+    "Reverb": ["room_size", "damping", "wet_level", "dry_level", "width", "freeze_mode"]
+}
+
+class PluginWindow:
+    def __init__(self, root, plugin_name):
+        self.root = root
+        self.fx_name = plugin_name
+        self.parameters = self.get_fx_parameter_names()
+        self.knobs = []
+        self.create_window()
+
+    def get_fx_parameter_names(self):
+        return PARAMNAMESMAP.get(self.fx_name, [])
+    
+    def create_window(self):
+        self.window = tk.Toplevel(self.root)
+        self.window.title(self.fx_name)
+        for param_name in self.parameter_names:
+            if hasattr(FX_DICT[self.fx_name], param_name):
+                param_value = getattr(FX_DICT[self.fx_name], param_name)
+                if isinstance(param_value, float):
+                    initial_value = getattr(FX_DICT[self.fx_name], param_name)
+                    knob = RadialKnob(self.window, label=param_name, from_=0, to=1, resolution=0.01, initial_value=initial_value)
+                    knob.pack()
+                    self.knobs.append(knob)
+
+    def get_parameters(self):
+        parameters = {}
+        for knob, param_name in zip(self.knobs, self.parameter_names):
+            parameters[param_name] = knob.get()
+        return parameters
 
 class App:
     def __init__(self, root):
@@ -53,8 +103,6 @@ class App:
         self.fx_currentbox.pack()
         self.process_button = tk.Button(self.root, text="Process Audio", command=self.process)
         self.process_button.pack()
-        self.test_rknob = RadialKnob(self.root)
-        self.test_rknob.pack()
 
     def open_file_dialog(self):
         self.input_file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav")])
@@ -98,8 +146,8 @@ class App:
             for fx_name in self.effects:
                 if fx_name in FX_LIST:
                     fx_plugin = FX_DICT[fx_name]
-                    toApply.append(fx_plugin())
-            # TODO: adjust plugin parameters accordingly from repsective class member vars
+                    fx_params = self.get_fx_parameters(fx_name)
+                    toApply.append(fx_plugin(**fx_params))
             self.board = Pedalboard(toApply)
             effected = self.board(audio, SAMPLE_RATE)
             with AudioFile(self.output_file_path, "w", SAMPLE_RATE, effected.shape[0]) as fout:
@@ -112,6 +160,21 @@ class App:
             else:
                 messagebox.showerror("Error", "Please select an input .wav and enter an output .wav")
         print(f"app.py process() Execution Time: {str(round(time() - start, 2))} seconds")
+
+    def get_fx_parameters(self, fx_name):
+        parameters = {}
+        for window in self.root.winfo_children():
+            if isinstance(window, tk.Toplevel) and window.wm_title() == fx_name:
+                for child in window.winfo_children():
+                    if isinstance(child, RadialKnob):
+                        parameters[child.cget("label")] = child.get()
+        return parameters
+
+    def show_plugin_window(self, event):
+        selected_idx = self.fx_currentbox.curselection()
+        if selected_idx:
+            fx_name = self.fx_currentbox.get(selected_idx[0])
+            PluginWindow(self.root, fx_name)
 
     def run(self):
         self.root.mainloop()
