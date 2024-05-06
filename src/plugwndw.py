@@ -1,15 +1,15 @@
 from rknob import *
 from pedalboard import Bitcrush, Chorus, Clipping, Compressor, Delay, Gain, Limiter, Phaser, Reverb
 # Pedalboard built-in FX class member vars and init / default values
-#print(vars(Bitcrush)) # bit_depth = 8 (float >= 32.0 && float <= 0.0)
-#print(vars(Chorus)) # rate_hz = 1.0 (float <= 100.0 && float >= 0.0), depth = 0.25 (float), centre_delay_ms = 7.0 (float), feedback = 0.0 (float), mix = 0.5 (float <= 1.0 && float >= 0.0)
-#print(vars(Clipping)) # threshold_db = -6.0 (float)
-#print(vars(Compressor)) # threshold_db = 0 (float), ratio = 1 (float >= 1.0), attack_ms = 1.0 (float), release_ms = 100 (float)
-#print(vars(Delay)) # delay_seconds = 0.5 (float >= 0.0), feedback = 0.0 (float <= 1.0 && float >= 0.0) , mix = 0.5 (float <= 1.0 && float >= 0.0)
-#print(vars(Gain)) # gain_db = 1.0 (float)
-#print(vars(Limiter)) # threshold_db = -10.0 (float), release_ms = 100.0 (float)
-#print(vars(Phaser)) # rate_hz = 1.0 (float >= 0.0), depth = 0.5 (float >= 0.0), centre_frequency_hz = 1300.0 (float >= 0.0), feedback = 0.0 (float <= 1.0 && float >= 0.0), mix = 0.5 (float <= 1.0 && float >= 0.0)
-#print(vars(Reverb)) # room_size = 0.5, damping = 0.5, wet_level = 0.33, dry_level = 0.4, width = 1.0, freeze_mode = 0.0 (all float <= 1.0 && float >= 0.0)
+#print(vars(Bitcrush))
+#print(vars(Chorus))
+#print(vars(Clipping))
+#print(vars(Compressor))
+#print(vars(Delay))
+#print(vars(Gain))
+#print(vars(Limiter))
+#print(vars(Phaser))
+#print(vars(Reverb))
 
 FX_DICT = {
     "Bitcrush": Bitcrush,
@@ -35,6 +35,76 @@ PARAMNAMESMAP = {
     "Reverb": ["room_size", "damping", "wet_level", "dry_level", "width", "freeze_mode"]
 }
 
+PARAMRANGES = {
+    "Bitcrush": {"bit_depth": (0, 32.0)},  # Range from 0 to 32.0 for bit_depth
+    "Chorus": {"rate_hz": (0, 100.0), "depth": (0, 1.0), "centre_delay_ms": (0, float('inf')), "feedback": (0, 1.0), "mix": (0, 1.0)},
+    "Clipping": {"threshold_db": (float('-inf'), 0)},  # Range from negative infinity to 0 for threshold_db
+    "Compressor": {"threshold_db": (0, float('inf')), "ratio": (1.0, float('inf')), "attack_ms": (0, float('inf')), "release_ms": (0, float('inf'))},
+    "Delay": {"delay_seconds": (0, float('inf')), "feedback": (0, 1.0), "mix": (0, 1.0)},
+    "Gain": {"gain_db": (float('-inf'), float('inf'))},  # Range from negative infinity to positive infinity for gain_db
+    "Limiter": {"threshold_db": (float('-inf'), 0), "release_ms": (0, float('inf'))},
+    "Phaser": {"rate_hz": (0, float('inf')), "depth": (0, 1.0), "centre_frequency_hz": (0, float('inf')), "feedback": (0, 1.0), "mix": (0, 1.0)},
+    "Reverb": {"room_size": (0, 1.0), "damping": (0, 1.0), "wet_level": (0, 1.0), "dry_level": (0, 1.0), "width": (0, 1.0), "freeze_mode": (0, 1.0)}
+}
+
+class BaseEffectUI(tk.Frame):
+    def __init__(self, master, effect_name):
+        super().__init__(master)
+        self.effect_name = effect_name
+        self.parameters = PARAMNAMESMAP.get(self.effect_name, [])
+        self.create_widgets()
+
+    def create_widgets(self):
+        for param_name in self.parameters:
+            if hasattr(FX_DICT[self.effect_name], param_name):
+                #param_range = PARAMRANGES.get(self.effect_name, {}).get(param_name, (0, 1))
+                #initial_value = getattr(FX_DICT[self.effect_name], param_name)
+                #knob = RadialKnob(self, label=param_name, from_=param_range[0], to=param_range[1], resolution=0.01, initial_value=initial_value)
+                knob = RadialKnob(self)
+                knob.pack()
+
+    def get_parameters(self):
+        parameters = {}
+        for param_name in self.parameters:
+            knob = self.nametowidget(param_name)
+            parameters[param_name] = knob.get()
+        return parameters
+
+class BitcrushUI(BaseEffectUI):
+    pass
+
+class ChorusUI(BaseEffectUI):
+    pass
+
+class ClippingUI(BaseEffectUI):
+    pass
+
+class CompressorUI(BaseEffectUI):
+    pass
+
+class DelayUI(BaseEffectUI):
+    pass
+
+class GainUI(BaseEffectUI):
+    pass
+
+class LimiterUI(BaseEffectUI):
+    pass
+
+class PhaserUI(BaseEffectUI):
+    pass
+
+class ReverbUI(BaseEffectUI):
+    pass
+
+def create_effect_ui(master, effect_name):
+    if effect_name in FX_DICT:
+        return globals()[effect_name + "UI"](master, effect_name)
+    else:
+        print("Error occurred in plugwndw.py :: create_effect_ui")
+        return None
+
+"""
 class PluginWindow:
     def __init__(self, root, plugin_name):
         self.root = root
@@ -63,6 +133,25 @@ class PluginWindow:
         for knob, param_name in zip(self.knobs, self.parameter_names):
             parameters[param_name] = knob.get()
         return parameters
-    
+"""
+class PluginWindow:
+    def __init__(self, root, plugin_name):
+        self.root = root
+        self.fx_name = plugin_name
+        self.ui = create_effect_ui(root, plugin_name)
+        if self.ui:
+            self.create_window()
+
+    def create_window(self):
+        self.window = tk.Toplevel(self.root)
+        self.window.title(self.fx_name)
+        self.ui.pack(in_=self.window)
+
+    def get_parameters(self):
+        if self.ui:
+            return self.ui.get_parameters()
+        else:
+            return {}
+
 if __name__ == "__main__":
     pass

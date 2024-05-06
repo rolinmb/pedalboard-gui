@@ -33,6 +33,7 @@ class App:
         self.remove_fx_button = tk.Button(self.root, text="Remove Effect", command=self.remove_fx)
         self.remove_fx_button.pack()
         self.fx_currentbox = tk.Listbox(self.root, selectmode=tk.SINGLE)
+        self.fx_currentbox.bind("<Button-3>", self.show_plugin_window)
         self.fx_currentbox.pack()
         self.process_button = tk.Button(self.root, text="Process Audio", command=self.process)
         self.process_button.pack()
@@ -71,6 +72,24 @@ class App:
         else:
             messagebox.showerror("Error", "Please select an effect to remove")
 
+    def show_plugin_window(self, event):
+        selected_idx = self.fx_currentbox.curselection()
+        if selected_idx:
+            fx_name = self.fx_currentbox.get(selected_idx[0])
+            plugin_window = PluginWindow(self.root, fx_name)
+            self.root.wait_window(plugin_window.window)
+            selected_parameters = plugin_window.get_parameters()
+            self.selected_plugins[fx_name] = selected_parameters
+
+    def get_fx_parameters(self, fx_name):
+        parameters = {}
+        for window in self.root.winfo_children():
+            if isinstance(window, tk.Toplevel) and window.wm_title() == fx_name:
+                for child in window.winfo_children():
+                    if isinstance(child, RadialKnob):
+                        parameters[child.cget("label")] = child.get()
+        return parameters
+
     def process(self):
         start = time()
         if self.input_file_path and self.output_file_path:
@@ -94,25 +113,7 @@ class App:
             else:
                 messagebox.showerror("Error", "Please select an input .wav and enter an output .wav")
         print(f"app.py process() Execution Time: {str(round(time() - start, 2))} seconds")
-
-    def get_fx_parameters(self, fx_name):
-        parameters = {}
-        for window in self.root.winfo_children():
-            if isinstance(window, tk.Toplevel) and window.wm_title() == fx_name:
-                for child in window.winfo_children():
-                    if isinstance(child, RadialKnob):
-                        parameters[child.cget("label")] = child.get()
-        return parameters
-
-    def show_plugin_window(self, event):
-        selected_idx = self.fx_currentbox.curselection()
-        if selected_idx:
-            fx_name = self.fx_currentbox.get(selected_idx[0])
-            plugin_window = PluginWindow(self.root, fx_name)
-            self.root.wait_window(plugin_window.window)
-            selected_parameters = plugin_window.get_parameters()
-            self.selected_plugins[fx_name] = selected_parameters
-
+    
     def run(self):
         self.root.mainloop()
 
